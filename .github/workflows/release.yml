@@ -27,5 +27,17 @@ jobs:
       - name: The tag matches VERSION
         run: test "v$(ruby -Ilib -rrunconvert -e 'print RunConvert::VERSION')" = "$GITHUB_REF_NAME"
       - run: gem build runconvert.gemspec
-      - uses: rubygems/configure-rubygems-credentials@v1.0.0
+      # Trusted publishing: swap GitHub's OIDC token for a 15-minute RubyGems key. Creating a new gem
+      # also needs the owning RubyGems account ("owner"); the official actions don't pass it yet.
+      - name: Get a short-lived RubyGems key
+        run: |
+          jwt=$(curl -sS -H "Authorization: bearer $ACTIONS_ID_TOKEN_REQUEST_TOKEN" "$ACTIONS_ID_TOKEN_REQUEST_URL&audience=rubygems.org" | jq -r .value)
+          echo "::add-mask::$jwt"
+          res=$(curl -sS -X POST https://rubygems.org/api/v1/oidc/trusted_publisher/exchange_token \
+            -H "Content-Type: application/json" \
+            -d "$(jq -n --arg jwt "$jwt" '{jwt: $jwt, owner: "runconvert"}')")
+          key=$(echo "$res" | jq -r '.rubygems_api_key // empty')
+          if [ -z "$key" ]; then echo "$res" | jq -c '.errors // .' ; exit 1; fi
+          echo "::add-mask::$key"
+          echo "GEM_HOST_API_KEY=$key" >> "$GITHUB_ENV"
       - run: gem push runconvert-*.gem
