@@ -66,7 +66,17 @@ module RunConvert
       return false unless given.match?(/\A[0-9a-f]{64}\z/)
 
       expected = OpenSSL::HMAC.hexdigest("SHA256", secret, raw_body.to_s)
-      OpenSSL.fixed_length_secure_compare(expected, given)
+      secure_compare(expected, given)
+    end
+
+    # Constant-time comparison of two equal-length strings (OpenSSL's own needs Ruby 3.0+).
+    def secure_compare(a, b)
+      return OpenSSL.fixed_length_secure_compare(a, b) if OpenSSL.respond_to?(:fixed_length_secure_compare)
+      return false unless a.bytesize == b.bytesize
+
+      diff = 0
+      a.bytes.zip(b.bytes) { |x, y| diff |= x ^ y }
+      diff.zero?
     end
 
     # Verifies the signature, then parses the event. Raises ArgumentError if it doesn't match.
