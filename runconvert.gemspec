@@ -14,8 +14,7 @@ Gem::Specification.new do |s|
   s.metadata = {
     "source_code_uri" => "https://github.com/runconvert/runconvert-ruby",
     "documentation_uri" => "https://www.runconvert.com/docs",
-    # Blocks an accidental `gem push` to rubygems.org before launch; remove at 1.0.
-    "allowed_push_host" => "https://example.invalid",
+    "changelog_uri" => "https://github.com/runconvert/runconvert-ruby/blob/main/CHANGELOG.md",
     "rubygems_mfa_required" => "true"
   }
 end

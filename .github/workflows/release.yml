@@ -1,0 +1,31 @@
+# Publishes to RubyGems when a version tag is pushed:
+#   1. bump VERSION in lib/runconvert.rb and CHANGELOG.md, merge to main
+#   2. gh release create v0.2.0 --target main   (or: git tag v0.2.0 && git push origin v0.2.0)
+#   3. approve the "release" environment in the Actions tab
+# Uses RubyGems trusted publishing (OIDC): no API key is stored anywhere.
+name: Release
+
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: read
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    environment: release
+    permissions:
+      id-token: write
+    steps:
+      - uses: actions/checkout@v5
+      - uses: ruby/setup-ruby@v1
+        with:
+          ruby-version: "3.3"
+      - run: ruby -Ilib test/test_unit.rb
+      - name: The tag matches VERSION
+        run: test "v$(ruby -Ilib -rrunconvert -e 'print RunConvert::VERSION')" = "$GITHUB_REF_NAME"
+      - run: gem build runconvert.gemspec
+      - uses: rubygems/configure-rubygems-credentials@v1.0.0
+      - run: gem push runconvert-*.gem
