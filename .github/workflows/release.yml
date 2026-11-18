@@ -19,8 +19,8 @@ jobs:
     permissions:
       id-token: write
     steps:
-      - uses: actions/checkout@v5
-      - uses: ruby/setup-ruby@v1
+      - uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5
+      - uses: ruby/setup-ruby@20eb24b0d509e2b9ed9b6d42ddfeb992915e0564 # v1
         with:
           ruby-version: "3.3"
       - run: ruby -Ilib test/test_unit.rb
