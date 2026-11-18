@@ -11,7 +11,7 @@ require "fileutils"
 #   rc = RunConvert::Client.new # reads RUNCONVERT_API_KEY
 #   rc.convert("report.docx", to: "pdf", out_dir: "out").saved # => ["out/report.pdf"]
 module RunConvert
-  VERSION = "0.1.0"
+  VERSION = "0.1.0" # x-release-please-version
   DEFAULT_BASE_URL = "https://api.runconvert.com/v3"
 
   # The API said no: {"success": false, "error": {"code", "message"}}. New codes can appear,
